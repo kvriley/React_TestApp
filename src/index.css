@@ -1,0 +1,12 @@
+body {
+  margin: 0;
+  padding: 0;
+  font-family: sans-serif;
+}
+.testDiv {
+  background-color: blue;
+  color:white;
+  width: 50%;
+  margin-left: 25%;
+  margin-right: 25%;
+}
