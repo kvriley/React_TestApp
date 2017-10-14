@@ -3,7 +3,6 @@ import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider';
 import Dialog from 'material-ui/Dialog';
 import FlatButton from 'material-ui/FlatButton';
 import RaisedButton from 'material-ui/RaisedButton';
-import $ from 'jquery';
 
 import './App.css';
 
@@ -30,22 +29,34 @@ class App extends Component {
   handleOpen = () => {
     this.setState({ ...this.state, open: true, dragging: false, x: 0, y: 0 });
     const rObj = this;
+
     setTimeout(function() {
-      $(".dragoverlay").on("mousemove", (e) => {
+      const dragOverlay = document.getElementsByClassName("dragoverlay")[0];
+      dragOverlay.onmousemove = (e) => {
         e.preventDefault();
         rObj.drag(e);
-     });
-     $(".dragpaper").on("mousemove", (e) => {
-       e.preventDefault();
-      rObj.drag(e);
-   });
-   $(".dragoverlay").on("mouseup", (e) => {
+      };
+      dragOverlay.onmouseup = (e) => {
+        e.preventDefault();
+        rObj.setDrag(e, false);
+      };
+
+      const dragPaper = document.getElementsByClassName("dragpaper")[0];
+      dragPaper.onmousemove = (e) => {
+        e.preventDefault();
+        rObj.drag(e);
+     };
+     dragPaper.onmouseup = (e) => {
+      e.preventDefault();
       rObj.setDrag(e, false);
-   });
-   $(".dragpaper").on("mouseup", (e) => {
-    rObj.setDrag(e, false);
- });
-  }, 1000);
+    };
+
+      /* add mover to title */
+      const dialogDragger=document.getElementById("dialogdragger"); 
+      const dragTitle = document.getElementsByClassName("dragtitle")[0];
+      dragTitle.append(dialogDragger);
+
+    },0);
     
   };
 
@@ -53,14 +64,10 @@ class App extends Component {
     this.setState({ ...this.state, open: false });
   };
 
-  handleDrag = (e) => {
-    console.log(`x:${e.clientX} y:${e.clientY}`);
-  }
-
   setDrag = (e, set) => {
 
     this.setState({ ...this.state, dragging: set, x: e.clientX, y: e.clientY }, () => {
-      console.log(`dragging set: ${set}`)
+//      console.log(`dragging set: ${set}`)
     });
   }
 
@@ -70,15 +77,21 @@ class App extends Component {
     let newX = e.clientX - this.state.x;
     let newY = e.clientY - this.state.y;
 
-    $("[data-reactroot]").css("top", newY);
-    $("[data-reactroot]").css("left", newX);
+    document.querySelectorAll('[data-reactroot]')[1].style.top = `${newY}px`;
+    document.querySelectorAll('[data-reactroot]')[1].style.left = `${newX}px`;
 
     console.log(`dragged to x: ${this.state.x} y: ${this.state.y}`)
   }
 
-
-
   render() {
+
+    const draggerStyle = {
+      cursor: 'move',
+      float: 'right',
+      'margin-right': '-20px',
+      'margin-top': '-20px',
+      'font-size': '12px'
+    };
 
     const actions = [
       <FlatButton
@@ -117,8 +130,10 @@ class App extends Component {
                 titleClassName="dragtitle"
                 >
                 <div
+                  id='dialogdragger'
+                  style= {draggerStyle}
                   onMouseDown={(e) => this.setDrag(e, true)}
-                  className="material-icons testdrag">settings_overscan</div>
+                  className="material-icons md-18">zoom_out_map</div>
               </Dialog>
           </div>
 
