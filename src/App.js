@@ -16,60 +16,65 @@ class App extends Component {
 
   constructor() {
     super();
-    this.state = {
-      open: false,
-      dragging: false,
-      x: 0,
-      y: 0
-    };
+    this.state= {open: false};
+    
     this.handleOpen = this.handleOpen.bind(this);
     this.handleClose = this.handleClose.bind(this);
   }
 
   handleOpen = () => {
-    this.setState({ ...this.state, open: true, dragging: false, x: 0, y: 0 });
-    const rObj = this;
+    this.setState({open: true, dragging: false, x: 0, y: 0 }, () => {
+      this.setPosition(this.state.x, this.state.y);
+      
+      const rObj = this;
 
-    setTimeout(function() {
-      const dragOverlay = document.getElementsByClassName("dragoverlay")[0];
-      dragOverlay.onmousemove = (e) => {
+      const dialogOverlay = document.getElementsByClassName("dialog-overlay")[0];
+      dialogOverlay.onmousemove = (e) => {
         e.preventDefault();
         rObj.drag(e);
       };
-      dragOverlay.onmouseup = (e) => {
+      dialogOverlay.onmouseup = (e) => {
         e.preventDefault();
         rObj.setDrag(e, false);
       };
 
-      const dragPaper = document.getElementsByClassName("dragpaper")[0];
-      dragPaper.onmousemove = (e) => {
+      const dialogPaper = document.getElementsByClassName("dialog-paper")[0];
+      dialogPaper.onmousemove = (e) => {
         e.preventDefault();
         rObj.drag(e);
-     };
-     dragPaper.onmouseup = (e) => {
+      };
+      dialogPaper.onmouseup = (e) => {
       e.preventDefault();
       rObj.setDrag(e, false);
-    };
+      };
 
       /* add mover to title */
-      const dialogDragger=document.getElementById("dialogdragger"); 
-      const dragTitle = document.getElementsByClassName("dragtitle")[0];
-      dragTitle.append(dialogDragger);
+      const dialogDragger=document.getElementById("dialogDragger"); 
+      const dialogTitle = document.getElementsByClassName("dialog-title")[0];
+      dialogTitle.append(dialogDragger);
+    });
 
-    },0);
-    
   };
 
   handleClose = (e) => {
-    this.setState({ ...this.state, open: false });
+    this.setState({ ...this.state, open: false});
   };
 
   setDrag = (e, set) => {
 
-    this.setState({ ...this.state, dragging: set, x: e.clientX, y: e.clientY }, () => {
-//      console.log(`dragging set: ${set}`)
+    let x = e.clientX - this.state.x;
+    let y = e.clientY - this.state.y;
+
+    this.setState({ ...this.state, dragging: set, x: x, y: y }, () => {
+//      console.log(`state set: ${set} x: ${x} y: ${y}`);
     });
   }
+
+  setPosition = (x,y) => {
+    document.querySelectorAll('[data-reactroot]')[1].style.left = `${x}px`;
+    document.querySelectorAll('[data-reactroot]')[1].style.top = `${y}px`;
+//    console.log(`position x: ${x} y: ${y}`)
+  };
 
   drag = (e) => {
     if (!this.state.dragging) return;
@@ -77,10 +82,7 @@ class App extends Component {
     let newX = e.clientX - this.state.x;
     let newY = e.clientY - this.state.y;
 
-    document.querySelectorAll('[data-reactroot]')[1].style.top = `${newY}px`;
-    document.querySelectorAll('[data-reactroot]')[1].style.left = `${newX}px`;
-
-    console.log(`dragged to x: ${this.state.x} y: ${this.state.y}`)
+    this.setPosition(newX, newY);
   }
 
   render() {
@@ -88,9 +90,9 @@ class App extends Component {
     const draggerStyle = {
       cursor: 'move',
       float: 'right',
-      'margin-right': '-20px',
-      'margin-top': '-20px',
-      'font-size': '12px'
+      'marginRight': '-20px',
+      'marginTop': '-20px',
+      'fontSize': '14px'
     };
 
     const actions = [
@@ -123,14 +125,12 @@ class App extends Component {
                 open={this.state.open}
                 onRequestClose={this.handleClose}
                 contentStyle={customContentStyle}
-                bodyClassName="dragbody"
-                contentClassName="dragcontent"
-                overlayClassName="dragoverlay"
-                paperClassName="dragpaper"
-                titleClassName="dragtitle"
+                overlayClassName="dialog-overlay"
+                paperClassName="dialog-paper"
+                titleClassName="dialog-title"
                 >
                 <div
-                  id='dialogdragger'
+                  id='dialogDragger'
                   style= {draggerStyle}
                   onMouseDown={(e) => this.setDrag(e, true)}
                   className="material-icons md-18">zoom_out_map</div>
